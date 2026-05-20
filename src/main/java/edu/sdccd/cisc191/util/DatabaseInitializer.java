@@ -6,19 +6,24 @@ public class DatabaseInitializer {
 
     public static void initialize() {
         try(Connection conn = DatabaseConfig.getConnection();
-            var stmt = conn.createStatement()){
+            var stmt = conn.createStatement()) {
+
             stmt.execute("""
-            CREATE TABLE IF NOT EXISTS students ( id INT PRIMARY KEY,
-            name VARCHAR(100) NOT NULL,
-                gpa DOUBLE NOT NULL)
-""");
+                CREATE TABLE IF NOT EXISTS students (
+                    id INT PRIMARY KEY,
+                    name VARCHAR(100) NOT NULL,
+                    gpa DOUBLE NOT NULL
+                )
+            """);
+
             stmt.execute("""
-CREATE TABLE IF NOT EXISTS courses (
-    if INT PRIMARY KEY,
-    title VARCHAR(100) NOT NULL,
-    student_id INT,
-    FOREIGN KEY (student_id) REFERENCES students(id))
-""");
+                CREATE TABLE IF NOT EXISTS courses (
+                    id INT PRIMARY KEY,
+                    title VARCHAR(100) NOT NULL,
+                    student_id INT,
+                    FOREIGN KEY (student_id) REFERENCES students(id)
+                )
+            """);
         } catch(Exception e){
             throw new RuntimeException("cannot run database initializer", e);
 

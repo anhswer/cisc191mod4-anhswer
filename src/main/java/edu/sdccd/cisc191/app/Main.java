@@ -20,6 +20,8 @@ public class Main {
         DatabaseInitializer.initialize();
         try(Connection conn = DatabaseConfig.getConnection()){
             System.out.println("connected");
+            conn.createStatement().executeUpdate("DELETE FROM courses");
+            conn.createStatement().executeUpdate("DELETE FROM students");
             // TODO create student service and repositories
             var StudentRepo = new JdbcStudentRepository(conn);
             var courseRepo = new JdbcCourseRepository(conn);
@@ -52,7 +54,10 @@ public class Main {
             System.out.println("\nRemaining courses:");
             courseRepo.findAll().forEach(System.out::println);
             // TODO print remaining students and courses
-
+            conn.createStatement().executeUpdate(
+                    "DELETE FROM courses WHERE student_id = 2"
+            );
+            studentService.removeStudent(2);
         }catch (Exception e){
             e.printStackTrace();
         }

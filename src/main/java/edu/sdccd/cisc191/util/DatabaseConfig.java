@@ -9,6 +9,6 @@ public class DatabaseConfig {
 
     public static Connection getConnection() throws SQLException {
         // TODO return a DriverManager connection
-        return null;
+        return DriverManager.getConnection(URL);
     }
 }

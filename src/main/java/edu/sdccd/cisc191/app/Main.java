@@ -1,16 +1,75 @@
 package edu.sdccd.cisc191.app;
 
+import edu.sdccd.cisc191.model.Course;
+import edu.sdccd.cisc191.model.Student;
+import edu.sdccd.cisc191.repository.JdbcCourseRepository;
+import edu.sdccd.cisc191.repository.JdbcStudentRepository;
+import edu.sdccd.cisc191.service.StudentService;
+import edu.sdccd.cisc191.util.DatabaseConfig;
+import edu.sdccd.cisc191.util.DatabaseInitializer;
+
+import java.sql.Connection;
+
 public class Main {
+
     public static void main(String[] args) {
-        // TODO initialize database
-        // TODO create student service and repositories
-        // TODO add at least 3 students
-        // TODO add at least 3 courses linked to students
-        // TODO print all students
-        // TODO find one student by ID
-        // TODO print courses for a student
-        // TODO update one GPA
-        // TODO delete one student
-        // TODO print remaining students and courses
+
+        DatabaseInitializer.initialize();
+
+        try (Connection conn = DatabaseConfig.getConnection()) {
+
+            System.out.println("connected");
+
+            conn.createStatement().executeUpdate("DELETE FROM courses");
+            conn.createStatement().executeUpdate("DELETE FROM students");
+
+            var studentRepo = new JdbcStudentRepository(conn);
+            var courseRepo = new JdbcCourseRepository(conn);
+            var studentService = new StudentService(studentRepo);
+
+            // Add students
+            studentService.addStudent(new Student(1, "Bob", 3.7));
+            studentService.addStudent(new Student(2, "bob1", 3.4));
+            studentService.addStudent(new Student(3, "bob2", 3.9));
+
+            // Add courses
+            courseRepo.save(new Course(101, "AP US History", 3));
+            courseRepo.save(new Course(102, "Calculus", 2));
+            courseRepo.save(new Course(103, "English", 1));
+
+            // Print all students
+            System.out.println("All students:");
+            studentService.getAllStudents().forEach(System.out::println);
+
+            // Find student by ID
+            System.out.println("\nStudent with ID 2:");
+            System.out.println(studentService.getStudent(2));
+
+            // Print courses for student
+            System.out.println("\nCourses for student 1:");
+            courseRepo.findByStudentId(1).forEach(System.out::println);
+
+            // Update GPA
+            System.out.println("\nUpdating GPA for student 3");
+            studentService.changeGpa(3, 4.0);
+
+            // Delete student 2 and their courses
+            conn.createStatement().executeUpdate(
+                    "DELETE FROM courses WHERE student_id = 2"
+            );
+
+            studentService.removeStudent(2);
+
+            // Print remaining students
+            System.out.println("\nRemaining students:");
+            studentService.getAllStudents().forEach(System.out::println);
+
+            // Print remaining courses
+            System.out.println("\nRemaining courses:");
+            courseRepo.findAll().forEach(System.out::println);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
